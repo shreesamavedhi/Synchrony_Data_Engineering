@@ -66,7 +66,7 @@ if __name__ == "__main__":
             if (exists(file_name_usr)):
                 file_list = parse_data(file_name_usr)
                 final_df = pd.DataFrame(file_list, columns=["id", "name", "city"])
-                final_df.to_csv( + file_name_usr.replace(".txt", ".csv"), sep="|", index=False)
+                final_df.to_csv("file_usr_results/" + file_name_usr.replace(".txt", ".csv"), sep="|", index=False)
                 print("user mode finished")
             else:
                 print("file does not exist")
