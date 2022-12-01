@@ -222,6 +222,31 @@ if __name__ == "__main__":
             file_name_usr = input("type file name: ")
 
             if (exists(file_name_usr)):
+                file_ = open(file_name_usr, 'r')
+                lines = file_.readlines()
+                split_line = lines[0].replace("(", "").replace(")", "").split(" ", 3)
+                p1_split = split_line[0].split(",", 1)
+                p2_split = split_line[1].split(",", 1)
+                p3_split = split_line[2].split(",", 1)
+                p4_split = split_line[3].split(",", 1)
+                p1 = Point(int(p1_split[0]), int(p1_split[1]))
+                p2 = Point(int(p2_split[0]), int(p2_split[1]))
+                p3 = Point(int(p3_split[0]), int(p3_split[1]))
+                p4 = Point(int(p4_split[0]), int(p4_split[1]))
+                points_temp = [p1, p2, p3, p4]
+                points_sorted = sorted_points(points_temp)
+
+                result = shape(points_sorted[0], points_sorted[1], points_sorted[2], points_sorted[3])
+
+                if(result != -1):
+                    result = remove_tail_dot_zeros(result)
+                    text_file = open("area_usr_results/" + file_name_usr, 'w')
+                    text_file.write(result)
+                    text_file.close()
+                else:
+                    text_file = open("area_usr_results/" + file_name_usr, 'w')
+                    text_file.write("-1")
+                    text_file.close()
 
                 print("user mode finished")
             else:
