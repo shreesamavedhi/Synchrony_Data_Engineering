@@ -61,6 +61,7 @@ def remove_tail_dot_zeros(a):
     tail_dot_rgx = re.compile(r'(?:(\.)|(\.\d*?[1-9]\d*?))0+(?=\b|[^0-9])')
     return tail_dot_rgx.sub(r'\2',a)
 
+# Source: https://stackoverflow.com/questions/44111169/remove-trailing-zeros-after-the-decimal-point-in-python
 ####################################################
 
 ################ Shape Areas #######################
