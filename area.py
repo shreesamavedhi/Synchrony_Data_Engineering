@@ -215,7 +215,7 @@ def test():
         else:
             # If result is -1, then the shape is invalid
             text_file = open(results_path + filename, 'w')
-            text_file.write("-1")
+            text_file.write("Other -1")
             text_file.close()
         try:
             # Assertions for each file tested compared with expected results
@@ -297,7 +297,7 @@ If you would like to exit, select 'done' mode. \n\
                     text_file.close()
                 else:
                     text_file = open("area_usr_results/" + file_name_usr, 'w')
-                    text_file.write("-1")
+                    text_file.write("Other -1")
                     text_file.close()
 
                 print("\n file saved! \n")
