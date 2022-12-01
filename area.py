@@ -51,13 +51,10 @@ def slope(p, q):
 
 # Function to calculate height of the trapezoid
 def findHeight(p1, p2, b, c):
-    a = max(p1, p2) - min(p1, p2)
-    # Apply Heron's formula
-    s = (a + b + c) // 2
-    # Calculate the area
-    area = math.sqrt(s * (s - a) * (s - b) * (s - c))
-    # Calculate height of trapezoid
-    height = (area * 2) / a
+    temp_u = (b - c)**2 + p1**2 - p2**2
+    temp_b = 2 * (b - c)
+    temp = temp_u / temp_b
+    height = math.sqrt(p1 ** 2 - temp **2)
     return height
 
 def remove_tail_dot_zeros(a):
@@ -68,22 +65,24 @@ def remove_tail_dot_zeros(a):
 
 ################ Shape Areas #######################
 def square(side):
-    return "Square " + str(side ** 2)
+    return "Square " + str(round(side ** 2, 3))
 
 def rectangle(width, height):
-    return "Rectangle " + str(width * height)
+    return "Rectangle " + str(round(width * height, 3))
 
 def parallelogram(side1, side2, angle):
-    return "Parallelogram " + str(side1 * side2 * math.sin(angle))
+    temp_area = round(side1 * side2 * math.sin(math.radians(angle)), 3)
+    return "Parallelogram " + str(temp_area)
+
 
 def trapezoid(height, width_1, width_2):
-    return "Trapezoid " + str(0.5 * height * ( width_1 + width_2 ))
+    return "Trapezoid " + str(round(0.5 * height * ( width_1 + width_2 ), 3))
 
 def rhombus(height, width):
-    return "Rhombus " + str(0.5 * height * width)
+    return "Rhombus " + str(round(0.5 * height * width, 3))
 
 def kite(height, width):
-    return "Kite " + str(0.5 * height * width)
+    return "Kite " + str(round(0.5 * height * width, 3))
 
 ####################################################
 
@@ -113,18 +112,16 @@ def shape(p1, p2, p3, p4):
     slope_list = [e1, e2, e3, e4]
     diag_list = [d1, d2]
 
-    print(side_list, angle_list, slope_list, diag_list)
-
     # any invalid distances, return -1
     for i in side_list:
         if i == 0:
-            print(side_list)
+            # print(side_list)
             print("Invalid side length")
             return -1
     
     for i in angle_list:
-        if i == 0:
-            print(angle_list)
+        if i >= 180:
+            # print(angle_list)
             print("Invalid angle")
             return -1
 
@@ -136,7 +133,7 @@ def shape(p1, p2, p3, p4):
             # Rectangle: All interior angles are 90 degrees
             return rectangle(s1, s2)
     
-    elif (e1 == e2 == e3 == e4):
+    elif (e1 == e3 and e2 == e4):
         if (s1 == s2 == s3 == s4):
             # Rhombus: Two pairs of parallel sides, All sides are equal
             return rhombus(d1, d2)
@@ -161,6 +158,7 @@ def shape(p1, p2, p3, p4):
             return kite(d2, d1)
     else:
         # Other
+        print("Other Quadrilateral")
         return -1
 
 def test():
@@ -191,14 +189,18 @@ def test():
             text_file = open(results_path + filename, 'w')
             text_file.write(result)
             text_file.close()
-            try:
-                # Assertions for each file tested
-                assert filecmp.cmp(expected_path + filename, results_path + filename)
-            except:
-                print(f"test for " + filename + " has unexpected result")
-                continue
-
-        return 
+        else:
+            text_file = open(results_path + filename, 'w')
+            text_file.write("-1")
+            text_file.close()
+        try:
+            # Assertions for each file tested
+            assert filecmp.cmp(expected_path + filename, results_path + filename)
+        except:
+            print(f"test for " + filename + " has unexpected result")
+            continue
+        
+    return 
 
 if __name__ == "__main__":
     class Point:
@@ -213,13 +215,9 @@ if __name__ == "__main__":
         if (mode == "test"):
             print("test mode begin")
             test()
-            # sort_points = sorted_points([Point(-5, -2), Point(-2, -3), Point(-1, 2), Point(0, -1)])
-            # for i in range(0, len(sort_points)):
-            #     print(sort_points[i].x, sort_points[i].y)
             print("exiting test mode")
 
         elif (mode == "user"):
-
             print("user mode begin")
             file_name_usr = input("type file name: ")
 
@@ -237,46 +235,3 @@ if __name__ == "__main__":
 
         else:
             print("invalid mode")
-
-
-# def area(p1, p2, p3, p4):
-#     d1 = distSq(p1, p2)
-#     d2 = distSq(p2, p3)
-#     d3 = distSq(p3, p4)
-#     d4 = distSq(p1, p4)
-#     d5 = distSq(p1, p3)
-#     d6 = distSq(p2, p4)
-
-#     dist_list = [d1, d2, d3, d4, d5, d6]
-    
-#     if (val == 0 for val in dist_list):
-#         return -1
-
-#     sides_2 = [number for number in dist_list if dist_list.count(number) > 1]
-#     two_sides = list(set(sides_2))
-#     # Check if two sides are equal and diagonals are equal
-#     if len(two_sides) == 3:
-#         two_sides.sort()
-#         # Rectangle: All interior angles are 90 degrees
-#         return two_sides[0] * two_sides[1]
-#     # elif len(two_sides) == 2:
-#     #     # Rhombus
-#     #     diag = set(dist_list) - two_sides[0] - two_sides[1]
-#     #     return (diag[0]*diag[1])/2
-
-#     sides_4 = [number for number in dist_list if dist_list.count(number) > 3]
-#     four_sides = list(set(sides_4))
-#     # Check if all sides are equal
-#     if (len(four_sides) == 1):
-#         diag = set(dist_list) - four_sides[0]
-#         if (diag[0] == diag[1]):
-#             # Square: All interior angles are 90 degrees, All sides are equal
-#             return four_sides[0]*four_sides[0];
-#         else:
-#             # Rhombus: Two pairs of parallel sides, All sides are equal
-#             return (diag[0]*diag[1])/2
-
-#     # Trapezoid: One pair of parallel sides
-#     # Parallelogram: Two pairs of parallel sides
-#     # Kite
-#     # Other
