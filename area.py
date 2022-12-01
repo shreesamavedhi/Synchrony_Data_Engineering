@@ -3,6 +3,7 @@ import filecmp
 from os.path import exists
 from pathlib import Path
 import pandas as pd
+import re
 
 ################################ Sort the given points in counter-clockwise order ################################
 
@@ -44,6 +45,8 @@ def angle(a, b, c):
 def slope(p, q):
     dy = q.y - p.y 
     dx = q.x - p.x
+    if dx == 0:
+        return 0
     return dy/dx
 
 # Function to calculate height of the trapezoid
@@ -56,6 +59,10 @@ def findHeight(p1, p2, b, c):
     # Calculate height of trapezoid
     height = (area * 2) / a
     return height
+
+def remove_tail_dot_zeros(a):
+    tail_dot_rgx = re.compile(r'(?:(\.)|(\.\d*?[1-9]\d*?))0+(?=\b|[^0-9])')
+    return tail_dot_rgx.sub(r'\2',a)
 
 ####################################################
 
@@ -82,10 +89,6 @@ def kite(height, width):
 
 def shape(p1, p2, p3, p4):
 
-    # sort points so that 
-    points = [p1, p2, p3, p4]
-    points.sort(key=lambda point: point.x)
-
     # four sides, two diagonals
     s1 = distSq(p1, p2)
     s2 = distSq(p2, p3)
@@ -110,9 +113,20 @@ def shape(p1, p2, p3, p4):
     slope_list = [e1, e2, e3, e4]
     diag_list = [d1, d2]
 
+    print(side_list, angle_list, slope_list, diag_list)
+
     # any invalid distances, return -1
-    if ((i == 0 for i in side_list) or (j == 0 for j in angle_list)):
-        return -1
+    for i in side_list:
+        if i == 0:
+            print(side_list)
+            print("Invalid side length")
+            return -1
+    
+    for i in angle_list:
+        if i == 0:
+            print(angle_list)
+            print("Invalid angle")
+            return -1
 
     if (a1 == a2 == a3 == a4 == 90):
         if(s1 == s2 == s3 == s4):
@@ -154,10 +168,10 @@ def test():
     results_path = 'testing_area/area_test_results/'
     expected_path = 'testing_area/area_test_expected/'
 
-    for p in Path(tests_path).glob('**/*.txt'):
+    for p in Path(tests_path).iterdir():
         filename = f"{p.name}"
-        file = open(filename, 'r')
-        lines = file.readlines()
+        file_ = open(tests_path + filename, 'r')
+        lines = file_.readlines()
         split_line = lines[0].replace("(", "").replace(")", "").split(" ", 3)
         p1_split = split_line[0].split(",", 1)
         p2_split = split_line[1].split(",", 1)
@@ -167,12 +181,22 @@ def test():
         p2 = Point(int(p2_split[0]), int(p2_split[1]))
         p3 = Point(int(p3_split[0]), int(p3_split[1]))
         p4 = Point(int(p4_split[0]), int(p4_split[1]))
-        result = shape(p1, p2, p3, p4)
+        points_temp = [p1, p2, p3, p4]
+        points_sorted = sorted_points(points_temp)
 
-        text_file = open(results_path + filename, 'w')
-        my_string = 'type your string here'
-        text_file.write(result)
-        text_file.close()
+        result = shape(points_sorted[0], points_sorted[1], points_sorted[2], points_sorted[3])
+        
+        if(result != -1):
+            result = remove_tail_dot_zeros(result)
+            text_file = open(results_path + filename, 'w')
+            text_file.write(result)
+            text_file.close()
+            try:
+                # Assertions for each file tested
+                assert filecmp.cmp(expected_path + filename, results_path + filename)
+            except:
+                print(f"test for " + filename + " has unexpected result")
+                continue
 
         return 
 
