@@ -1,4 +1,8 @@
 import math
+import filecmp
+from os.path import exists
+from pathlib import Path
+import pandas as pd
 
 ################################ Sort the given points in counter-clockwise order ################################
 
@@ -33,29 +37,46 @@ def sorted_points(points):
 def distSq(p, q):
     return ((p.x - q.x)**2 + (p.y - q.y)**2)**0.5
 
+def angle(a, b, c):
+    ang = math.degrees(math.atan2(c.y-b.y, c.x-b.x) - math.atan2(a.y-b.y, a.x-b.x))
+    return ang + 360 if ang < 0 else ang
+
 def slope(p, q):
-    return (q.y - p.y) / (q.x - p.x)
+    dy = q.y - p.y 
+    dx = q.x - p.x
+    return dy/dx
+
+# Function to calculate height of the trapezoid
+def findHeight(p1, p2, b, c):
+    a = max(p1, p2) - min(p1, p2)
+    # Apply Heron's formula
+    s = (a + b + c) // 2
+    # Calculate the area
+    area = math.sqrt(s * (s - a) * (s - b) * (s - c))
+    # Calculate height of trapezoid
+    height = (area * 2) / a
+    return height
 
 ####################################################
 
 ################ Shape Areas #######################
 def square(side):
-    return side ** 2
+    return "Square " + str(side ** 2)
 
 def rectangle(width, height):
-    return width * height
+    return "Rectangle " + str(width * height)
 
-def parallelogram(side, height):
-    return side * height
+def parallelogram(side1, side2, angle):
+    return "Parallelogram " + str(side1 * side2 * math.sin(angle))
 
-def trapezium(height, width_1, width_2):
-    return 0.5 * height * ( width_1 + width_2 )
+def trapezoid(height, width_1, width_2):
+    return "Trapezoid " + str(0.5 * height * ( width_1 + width_2 ))
 
 def rhombus(height, width):
-    return 0.5 * height * width
+    return "Rhombus " + str(0.5 * height * width)
 
 def kite(height, width):
-    return 0.5 * height * width
+    return "Kite " + str(0.5 * height * width)
 
 ####################################################
 
@@ -71,34 +92,89 @@ def shape(p1, p2, p3, p4):
     s3 = distSq(p3, p4)
     s4 = distSq(p4, p1)
 
-    d5 = distSq(p1, p3)
-    d6 = distSq(p2, p4)
+    a1 = angle(p1, p2, p3)
+    a2 = angle(p2, p3, p4)
+    a3 = angle(p3, p4, p1)
+    a4 = angle(p4, p1, p2)
 
-    dist_list = [d1, d2, d3, d4, d5, d6]
+    e1 = slope(p1, p2)
+    e2 = slope(p2, p3)
+    e3 = slope(p3, p4)
+    e4 = slope(p4, p1)
+
+    d1 = distSq(p1, p3)
+    d2 = distSq(p2, p4)
+
+    side_list = [s1, s2, s3, s4]
+    angle_list = [a1, a2, a3, a4]
+    slope_list = [e1, e2, e3, e4]
+    diag_list = [d1, d2]
 
     # any invalid distances, return -1
-    if (val == 0 for val in dist_list):
+    if ((i == 0 for i in side_list) or (j == 0 for j in angle_list)):
         return -1
 
-    # count the duplicate distances
-    sides = [number for number in dist_list if dist_list.count(number) > 1]
-
+    if (a1 == a2 == a3 == a4 == 90):
+        if(s1 == s2 == s3 == s4):
+            # Square: All interior angles are 90 degrees, All sides are equal
+            return square(s1)
+        else:
+            # Rectangle: All interior angles are 90 degrees
+            return rectangle(s1, s2)
     
-    # Rectangle: All interior angles are 90 degrees
-    # Square: All interior angles are 90 degrees, All sides are equal
-    
-    # Trapezoid: One pair of parallel sides
-    # Rhombus: Two pairs of parallel sides, All sides are equal
-    # Parallelogram: Two pairs of parallel sides
-
-    # Kite: Two equal sides, pair must be adjacent and distinct
-    # Other
-
-
+    elif (e1 == e2 == e3 == e4):
+        if (s1 == s2 == s3 == s4):
+            # Rhombus: Two pairs of parallel sides, All sides are equal
+            return rhombus(d1, d2)
+        else:
+            # Parallelogram: Two pairs of parallel sides
+            return parallelogram(s1, s2, a1)
+    elif (e1 == e3 or e2 == e4):
+        if(e1 == e3):
+            # Trapezoid: One pair of parallel sides
+            height = findHeight(s2, s4, s1, s3)
+            return trapezoid(height, s1, s3)
+        else:
+            # Trapezoid: One pair of parallel sides
+            height = findHeight(s1, s3, s2, s4)
+            return trapezoid(height, s2, s4)
+    elif ( (s1 == s2 and s3 == s4 and s1 != s3) or (s2 == s3 and s4 == s1 and s2 != s4)):
+        if (s1 == s2 and s3 == s4 and s1 != s3):
+            # Kite: Two equal sides, pair must be adjacent and distinct
+            return kite(d1, d2)
+        else:
+            # Kite: Two equal sides, pair must be adjacent and distinct
+            return kite(d2, d1)
+    else:
+        # Other
+        return -1
 
 def test():
+    tests_path = 'testing_area/area_tests/'
+    results_path = 'testing_area/area_test_results/'
+    expected_path = 'testing_area/area_test_expected/'
 
-    pass
+    for p in Path(tests_path).glob('**/*.txt'):
+        filename = f"{p.name}"
+        file = open(filename, 'r')
+        lines = file.readlines()
+        split_line = lines[0].replace("(", "").replace(")", "").split(" ", 3)
+        p1_split = split_line[0].split(",", 1)
+        p2_split = split_line[1].split(",", 1)
+        p3_split = split_line[2].split(",", 1)
+        p4_split = split_line[3].split(",", 1)
+        p1 = Point(int(p1_split[0]), int(p1_split[1]))
+        p2 = Point(int(p2_split[0]), int(p2_split[1]))
+        p3 = Point(int(p3_split[0]), int(p3_split[1]))
+        p4 = Point(int(p4_split[0]), int(p4_split[1]))
+        result = shape(p1, p2, p3, p4)
+
+        text_file = open(results_path + filename, 'w')
+        my_string = 'type your string here'
+        text_file.write(result)
+        text_file.close()
+
+        return 
 
 if __name__ == "__main__":
     class Point:
@@ -112,10 +188,10 @@ if __name__ == "__main__":
 
         if (mode == "test"):
             print("test mode begin")
-            # test()
-            sort_points = sorted_points([Point(-5, -2), Point(-2, -3), Point(-1, 2), Point(0, -1)])
-            for i in range(0, len(sort_points)):
-                print(sort_points[i].x, sort_points[i].y)
+            test()
+            # sort_points = sorted_points([Point(-5, -2), Point(-2, -3), Point(-1, 2), Point(0, -1)])
+            # for i in range(0, len(sort_points)):
+            #     print(sort_points[i].x, sort_points[i].y)
             print("exiting test mode")
 
         elif (mode == "user"):
