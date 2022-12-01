@@ -116,13 +116,13 @@ def shape(p1, p2, p3, p4):
     for i in side_list:
         if i == 0:
             # print(side_list)
-            print("Invalid side length")
+            print("Other: Invalid side length")
             return -1
     
     for i in angle_list:
         if i >= 180:
             # print(angle_list)
-            print("Invalid angle")
+            print("Other: Invalid angle")
             return -1
 
     if (a1 == a2 == a3 == a4 == 90):
@@ -158,13 +158,14 @@ def shape(p1, p2, p3, p4):
             return kite(d2, d1)
     else:
         # Other
-        print("Other Quadrilateral")
+        print("Other: Other Quadrilateral")
         return -1
 
 def test():
     tests_path = 'testing_area/area_tests/'
     results_path = 'testing_area/area_test_results/'
     expected_path = 'testing_area/area_test_expected/'
+    test_flag = True
 
     for p in Path(tests_path).iterdir():
         filename = f"{p.name}"
@@ -198,7 +199,13 @@ def test():
             assert filecmp.cmp(expected_path + filename, results_path + filename)
         except:
             print(f"test for " + filename + " has unexpected result")
+            test_flag = False
             continue
+
+    if(test_flag):
+        print("\n $$$ All tests passed!! $$$ \n")
+    else:
+        print("\n ### Some tests failed ### \n")
         
     return 
 
@@ -209,16 +216,24 @@ if __name__ == "__main__":
             self.x = x
             self.y = y
 
-    while(1):
-        mode = input("type 'test', 'user', or 'done': ")
+    print("\n*** Wecome to the Quadrilateral Area Calculator! ***\n \n\
+Please enter the coordinates of the four points of your quadrilateral in the following format into a text file: \n\
+(x1, y1) (x2, y2) (x3, y3) (x4, y4) \n\
+Then, select 'user' mode, and enter the name of the file. \n\
+If you would like to test the program, select 'test' mode. \n\
+If you would like to exit, select 'done' mode. \n\
+")
+
+    while(1):        
+        mode = input("Type 'test', 'user', or 'done': ")
 
         if (mode == "test"):
-            print("test mode begin")
+            print("\n ***test mode begin*** \n")
             test()
-            print("exiting test mode")
+            print("***exiting test mode*** \n \n")
 
         elif (mode == "user"):
-            print("user mode begin")
+            print("\n ***user mode begin*** \n")
             file_name_usr = input("type file name: ")
 
             if (exists(file_name_usr)):
@@ -248,15 +263,15 @@ if __name__ == "__main__":
                     text_file.write("-1")
                     text_file.close()
 
-                print("user mode finished")
+                print("\n file saved! \n")
             else:
-                print("file does not exist")
+                print("\n file does not exist! \n")
             
-            print("exiting user mode")
+            print("***exiting user mode*** \n")
 
         elif (mode == "done"):
-            print("exiting program")
+            print("\n ***exiting program*** \n")
             break
 
         else:
-            print("invalid mode")
+            print("\ninvalid mode!\n")

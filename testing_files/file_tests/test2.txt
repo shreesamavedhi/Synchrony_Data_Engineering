@@ -1,0 +1,3 @@
+id=^^name=bel, james^^city=paris
+id=11^^name=^^city=Chicago
+id=12^^name=mcdonalds, julie^^city=NY=C
